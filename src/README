@@ -1,0 +1,27 @@
+CSC442: Intro to AI
+Project 2: Automated Reasoning
+October 9, 2019
+Authors:
+ - Soubhik Ghosh (netid: sghosh13)
+ - Rich Magnotti (netid: rmagnott)
+
+Languages: Haskell, Python
+
+Files in src/:
+        README, Makefile, *.hs, *.py
+
+Prerequisites:
+	'make' utility
+	'ghc' compiler (Glasgow Haskell Compiler)
+	python3
+        'HUnit' (Testing Framework in haskell: Run 'cabal update && cabal install HUnit')
+
+Build Instructions:
+	- cd src/ (Go inside source directory)
+	- make (Fire "make" command)
+
+Output
+	- Test (binary file to run tests)
+
+Running Example:
+	- ./Test
