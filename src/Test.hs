@@ -111,7 +111,77 @@ main = do
 
    putStrLn $ "Ans with model checking: " ++ isStones1
    putStrLn $ "Ans with resolution: " ++ isStones2 
-     
+    
+   putStrLn "\nThe Doors of Enlightenment."
+ 
+   -- May not be correct (WIP) 
+   let kb5 = "(A <=> X) && (B <=> (Y || Z)) && (C <=> (A && B)) && (D <=> (X && Y)) && (E <=> (X && Z)) && (F <=> (D || E)) && (G <=> (C => F)) && (H <=> ((G && H) => A))"
+
+   putStrLn "Smullyan’s problem"
+   putStrLn $ "Knowledge base: " ++ kb5
+   
+   putStrLn "Query: Door X"
+   let isDoorX1 = inference (ttEntails (parse kb5) (parse "X")) (ttEntails (parse kb5) (parse "!X"))
+   let isDoorX2 = inference (plResolution (parse kb5) (parse "X")) (plResolution (parse kb5) (parse "!X"))   
+
+   putStrLn $ "Ans with model checking: " ++ isDoorX1
+   putStrLn $ "Ans with resolution: " ++ isDoorX2
+ 
+   putStrLn "Query: Door Y"
+   let isDoorY1 = inference (ttEntails (parse kb5) (parse "Y")) (ttEntails (parse kb5) (parse "!Y"))
+--   let isDoorY2 = inference (plResolution (parse kb5) (parse "Y")) (plResolution (parse kb5) (parse "!Y"))
+
+   putStrLn $ "Ans with model checking: " ++ isDoorY1
+--   putStrLn $ "Ans with resolution: " ++ isDoorY2
+
+   putStrLn "Query: Door Z"
+   let isDoorZ1 = inference (ttEntails (parse kb5) (parse "Z")) (ttEntails (parse kb5) (parse "!Z"))
+--   let isDoorZ2 = inference (plResolution (parse kb5) (parse "Z")) (plResolution (parse kb5) (parse "!Z"))
+
+   putStrLn $ "Ans with model checking: " ++ isDoorZ1
+--   putStrLn $ "Ans with resolution: " ++ isDoorZ2
+
+   putStrLn "Query: Door W"
+   let isDoorW1 = inference (ttEntails (parse kb5) (parse "W")) (ttEntails (parse kb5) (parse "!W"))
+--   let isDoorW2 = inference (plResolution (parse kb5) (parse "W")) (plResolution (parse kb5) (parse "!W")) 
+
+   putStrLn $ "Ans with model checking: " ++ isDoorW1
+--   putStrLn $ "Ans with resolution: " ++ isDoorW2
+
+   -- May not be correct (WIP)
+   let kb6 = "(A <=> X) && (H <=> ((G && H) => A)) && (C <=> (A && (B || C || D || E || F || G || H))) && G"
+   
+   putStrLn "Liu’s problem"
+   putStrLn $ "Knowledge base: " ++ kb6
+
+   putStrLn "Query: Door X"
+   let isDoorLX1 = inference (ttEntails (parse kb6) (parse "X")) (ttEntails (parse kb6) (parse "!X"))
+   let isDoorLX2 = inference (plResolution (parse kb6) (parse "X")) (plResolution (parse kb6) (parse "!X"))
+
+   putStrLn $ "Ans with model checking: " ++ isDoorLX1
+   putStrLn $ "Ans with resolution: " ++ isDoorLX2
+
+   putStrLn "Query: Door Y"
+   let isDoorLY1 = inference (ttEntails (parse kb6) (parse "Y")) (ttEntails (parse kb6) (parse "!Y"))
+--   let isDoorLY2 = inference (plResolution (parse kb6) (parse "Y")) (plResolution (parse kb6) (parse "!Y"))
+
+   putStrLn $ "Ans with model checking: " ++ isDoorLY1
+--   putStrLn $ "Ans with resolution: " ++ isDoorLY2
+
+   putStrLn "Query: Door Z"
+   let isDoorLZ1 = inference (ttEntails (parse kb6) (parse "Z")) (ttEntails (parse kb6) (parse "!Z"))
+--   let isDoorZ2 = inference (plResolution (parse kb5) (parse "Z")) (plResolution (parse kb5) (parse "!Z"))
+
+   putStrLn $ "Ans with model checking: " ++ isDoorLZ1
+--   putStrLn $ "Ans with resolution: " ++ isDoorZ2
+
+   putStrLn "Query: Door W"
+   let isDoorLW1 = inference (ttEntails (parse kb6) (parse "W")) (ttEntails (parse kb6) (parse "!W"))
+--   let isDoorW2 = inference (plResolution (parse kb5) (parse "W")) (plResolution (parse kb5) (parse "!W")) 
+
+   putStrLn $ "Ans with model checking: " ++ isDoorLW1
+--   putStrLn $ "Ans with resolution: " ++ isDoorW2
+
    putStrLn ""  
    runTestTT $ test [test1, test3, test4, test5, test6, test7, test8]
 

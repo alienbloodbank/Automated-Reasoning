@@ -2,6 +2,7 @@ GHC = ghc
 SOURCE = Test.hs
 OBJECTS = $(wildcard *.hi *.o)
 TARGET = Test
+DEPS = $(wildcard *.hs)
 
 default: $(TARGET)
 
