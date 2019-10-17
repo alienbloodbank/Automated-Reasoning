@@ -47,9 +47,9 @@ main = do
    -- Horned: H
    -- Magical: G
 
-   putStrLn "Knowledge base: (Y => I) && (!Y => !I) && ((I || M) => H) && (H => G)"
+   putStrLn "Knowledge base: (Y => I) && (!Y => (!I && M)) && ((I || M) => H) && (H => G)"
    putStrLn "Query: Mythical (Y)"
-   let kb3 = "(Y => I) && (!Y => !I) && ((I || M) => H) && (H => G)"
+   let kb3 = "(Y => I) && (!Y => (!I && M)) && ((I || M) => H) && (H => G)"
    let isMythical1 = inference (ttEntails (parse kb3) (parse "Y")) (ttEntails (parse kb3) (parse "!Y"))
    let isMythical2 = inference (plResolution (parse kb3) (parse "Y")) (plResolution (parse kb3) (parse "!Y"))
    
@@ -74,7 +74,7 @@ main = do
    let test5 = "test5" ~: "Query Horned" ~: isHorned2 ~=? isHorned1
    
    putStrLn $ "Ans with model checking: " ++ isHorned1 
-   putStrLn $ "Ans with model checking: " ++ isHorned2
+   putStrLn $ "Ans with resolution: " ++ isHorned2
 
    putStrLn "\nThe Labyrinth Test."
    -- Gold: G
