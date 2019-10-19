@@ -3,79 +3,81 @@ module Parser (parse) where
 import Formula
 import Scanner
 
--- !, &&, ||, =>, <=>
+type TokenIterator = (Prop, [Token])
+type TokenList = [Token]
+
+-- !, &, |, =>, <=>
 applyPrecedence :: Prop -> String -> Prop -> Prop
-applyPrecedence (Par l) op t
-    | op == "&&" = (Par l) :&&: (t)
-    | op == "||" = (Par l) :||: (t)
-    | op == "=>" = (Par l) :=>: (t)
-    | op == "<=>" = (Par l) :<=>: (t)
-applyPrecedence (Symbol l) op t
-    | op == "&&" = (Symbol l) :&&: (t)
-    | op == "||" = (Symbol l) :||: (t)
-    | op == "=>" = (Symbol l) :=>: (t)
-    | op == "<=>" = (Symbol l) :<=>: (t)
-applyPrecedence (Not l) op t
-    | op == "&&" = (Not l) :&&: (t)
-    | op == "||" = (Not l) :||: (t)
-    | op == "=>" = (Not l) :=>: (t)
-    | op == "<=>" = (Not l) :<=>: (t)
-applyPrecedence (l :<=>: r) op t
-    | (op == "&&") || (op == "||") || (op == "=>") = l :<=>: (applyPrecedence r op t)
-    | op == "<=>" = (l :<=>: r) :<=>: (t)
-applyPrecedence (l :=>: r) op t
-    | (op == "&&") || (op == "||") = l :=>: (applyPrecedence r op t)
-    | op == "<=>" = (l :=>: r) :<=>: (t)
-    | op == "=>" = (l :=>: r) :=>: (t)
-applyPrecedence (l :||: r) op t
-    | op == "&&" = l :||: (applyPrecedence r "&&" t)
-    | op == "||" = (l :||: r) :||: (t)
-    | op == "=>" = (l :||: r) :=>: (t)
-    | op == "<=>" = (l :||: r) :<=>: (t)
-applyPrecedence (l :&&: r) op t
-    | op == "&&" = (l :&&: r) :&&: (t)
-    | op == "||" = (l :&&: r) :||: (t)
-    | op == "=>" = (l :&&: r) :=>: (t)
-    | op == "<=>" = (l :&&: r) :<=>: (t)
+applyPrecedence n@(Par l) op t
+    | op == "&" = n :&: t
+    | op == "|" = n :|: t
+    | op == "=>" = n :=>: t
+    | op == "<=>" = n :<=>: t
+applyPrecedence n@(Atom l) op t
+    | op == "&" = n :&: t
+    | op == "|" = n :|: t
+    | op == "=>" = n :=>: t
+    | op == "<=>" = n :<=>: t
+applyPrecedence n@(Not l) op t
+    | op == "&" = n :&: t
+    | op == "|" = n :|: t
+    | op == "=>" = n :=>: t
+    | op == "<=>" = n :<=>: t
+applyPrecedence n@(l :<=>: r) op t
+    | (op == "&") || (op == "|") || (op == "=>") = l :<=>: (applyPrecedence r op t)
+    | op == "<=>" = n :<=>: t
+applyPrecedence n@(l :=>: r) op t
+    | (op == "&") || (op == "|") = l :=>: (applyPrecedence r op t)
+    | op == "<=>" = n :<=>: t
+    | op == "=>" = n :=>: t
+applyPrecedence n@(l :|: r) op t
+    | op == "&" = l :|: (applyPrecedence r op t)
+    | op == "|" = n :|: t
+    | op == "=>" = n :=>: t
+    | op == "<=>" = n :<=>: t
+applyPrecedence n@(l :&: r) op t
+    | op == "&" = n :&: t
+    | op == "|" = n :|: t
+    | op == "=>" = n :=>: t
+    | op == "<=>" = n :<=>: t
 
 
 newProp :: [Prop] -> [String] -> Prop -> Prop
-newProp temp ("!":res) t = newProp temp res (Not t)
+newProp tree ("!":res) t = newProp tree res (Not t)
 newProp _ [] t = (t)
-newProp (temp:[]) ("&&":[]) t = applyPrecedence temp "&&" t
-newProp (temp:[]) ("||":[]) t = applyPrecedence temp "||" t
-newProp (temp:[]) ("=>":[]) t = applyPrecedence temp "=>" t
-newProp (temp:[]) ("<=>":[]) t = applyPrecedence temp "<=>" t
+newProp (tree:[]) ("&":[]) t = applyPrecedence tree "&" t
+newProp (tree:[]) ("|":[]) t = applyPrecedence tree "|" t
+newProp (tree:[]) ("=>":[]) t = applyPrecedence tree "=>" t
+newProp (tree:[]) ("<=>":[]) t = applyPrecedence tree "<=>" t
 
 
-buildTree :: [Token] -> [Prop] -> [String] -> (Prop, [Token])
-buildTree [] sym _ = let (temp:[]) = sym in (temp, [])
-buildTree ((Param "(") : rest) sym op
+buildTree :: TokenList -> [Prop] -> [String] -> TokenIterator
+buildTree [] treeList _ = let (tree:[]) = treeList in (tree, [])
+buildTree ((Param "(") : rest) treeList op
     | op == [] = buildTree r [t] []
-    | otherwise = buildTree r [newProp sym op t] []
+    | otherwise = buildTree r [newProp treeList op t] []
     where (t, r) = (buildTree rest [] [])
-buildTree ((Param ")") : rest) sym _ = let (temp:[]) = sym in (Par temp, rest)
-buildTree ((Connective "<=>") : rest) sym op = buildTree rest sym ["<=>"]
-buildTree ((Connective "=>") : rest) sym op = buildTree rest sym ["=>"]
-buildTree ((Connective "||") : rest) sym op = buildTree rest sym ["||"]
-buildTree ((Connective "&&") : rest) sym op = buildTree rest sym ["&&"]
-buildTree ((Connective "!") : rest) sym op = buildTree rest sym ("!":op)
-buildTree ((Var s) : rest) sym op
-    | op == [] = buildTree rest [(Symbol s)] []
-    | otherwise = buildTree rest [newProp sym op (Symbol s)] []
+buildTree ((Param ")") : rest) treeList _ = let (tree:[]) = treeList in (Par tree, rest)
+buildTree ((Connective "<=>") : rest) treeList op = buildTree rest treeList ["<=>"]
+buildTree ((Connective "=>") : rest) treeList op = buildTree rest treeList ["=>"]
+buildTree ((Connective "|") : rest) treeList op = buildTree rest treeList ["|"]
+buildTree ((Connective "&") : rest) treeList op = buildTree rest treeList ["&"]
+buildTree ((Connective "!") : rest) treeList op = buildTree rest treeList ("!" : op)
+buildTree ((Var s) : rest) treeList op
+    | op == [] = buildTree rest [(Atom s)] []
+    | otherwise = buildTree rest [newProp treeList op (Atom s)] []
 
 
 removeParams :: Prop -> Prop
 removeParams (Par l) = removeParams l
 removeParams (l :<=>: r) = (removeParams l) :<=>: (removeParams r)
 removeParams (l :=>: r) = (removeParams l) :=>: (removeParams r)
-removeParams (l :||: r) = (removeParams l) :||: (removeParams r)
-removeParams (l :&&: r) = (removeParams l) :&&: (removeParams r)
+removeParams (l :|: r) = (removeParams l) :|: (removeParams r)
+removeParams (l :&: r) = (removeParams l) :&: (removeParams r)
 removeParams (Not l) = Not (removeParams l)
-removeParams (Symbol s) = Symbol s
+removeParams (Atom a) = Atom a
 
 
 parse :: String -> Prop
 parse formula = let (tree, _) = (buildTree (tokenize formula) [] []) in (removeParams tree)
-
 

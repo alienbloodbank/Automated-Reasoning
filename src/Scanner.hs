@@ -24,8 +24,8 @@ tokenize :: String  -> [Token]
 tokenize ('(':r) = (Param "(") : (tokenize r)
 tokenize (')':r) = (Param ")") : (tokenize r)
 tokenize ('!':r) = (Connective "!") : (tokenize r)
-tokenize ('&':'&':r) = (Connective "&&") : (tokenize r)
-tokenize ('|':'|':r) = (Connective "||") : (tokenize r)
+tokenize ('&':r) = (Connective "&") : (tokenize r)
+tokenize ('|':r) = (Connective "|") : (tokenize r)
 tokenize ('=':'>':r) = (Connective "=>") : (tokenize r)
 tokenize ('<':'=':'>':r) = (Connective "<=>") : (tokenize r)
 tokenize (h:t)
@@ -34,9 +34,9 @@ tokenize (h:t)
 tokenize "" = []
 
 scanProp :: Token -> String -> [Token]
-scanProp (Var n) (h:t)
- | isAlphaNum h = scanProp (Var (n++[h])) t
- | otherwise = (Var n) : (tokenize (h:t))
-scanProp (Var n) [] = (Var n):[]
+scanProp (Var n) (h : t)
+ | isAlphaNum h = scanProp (Var (n ++ [h])) t
+ | otherwise = (Var n) : (tokenize (h : t))
+scanProp (Var n) [] = (Var n) : []
 
 
