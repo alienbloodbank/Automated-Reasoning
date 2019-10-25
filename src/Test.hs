@@ -48,7 +48,8 @@ driver = do
    runProblem "Modus Ponens test."
               "(P => Q) & P"
               "Q"
-   
+   -- CNF: (!P | Q) & P  
+
    printf "\nPress Enter to continue...\n"
    hFlush stdout
    getLine   
@@ -56,6 +57,7 @@ driver = do
    runProblem "Wumpus World test."
               "!P11 & (B11 <=> (P12 | P21)) & (B21 <=> (P11 | P22 | P31)) & !B11 & B21"
               "P12"
+   -- CNF: !P11 & (P12 | P21 | !B11) & (!P12 | B11) & (!P21 | B11) & (P11 | P22 | P31 | !B21) & (!P11 | B21) & (!P22 | B21) & (!P31 | B21) & !B11 & B21
 
    printf "\nPress Enter to continue...\n"
    hFlush stdout
@@ -67,6 +69,9 @@ driver = do
    -- Mammal: M
    -- Horned: H
    -- Magical: G
+ 
+   -- CNF: (!Y | I) & (!I | Y) & (M | Y) & (!I | H) & (!M | H) & (!H | G)
+
    runProblem testName kb "Y"
 
    runProblem testName kb "G"
@@ -81,6 +86,8 @@ driver = do
    -- Gold: G
    -- Marble: M
    -- Stones: S
+
+   -- CNF: (S | !G) & (!M | !G) & (G | S) & (!G | M)
    runProblem testName kb "G"
 
    runProblem testName kb "M"
