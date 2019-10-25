@@ -1,13 +1,13 @@
 GHC = ghc
-SOURCE = Test.hs
+SOURCES = $(wildcard *.hs)
 OBJECTS = $(wildcard *.hi *.o)
+DRIVER = Test.hs
 TARGET = Test
-DEPS = $(wildcard *.hs)
 
 default: $(TARGET)
 
-Test: $(SOURCE)
-	$(GHC) $<
+Test: $(SOURCES)
+	$(GHC) $(DRIVER)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
