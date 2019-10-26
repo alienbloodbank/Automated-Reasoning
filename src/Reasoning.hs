@@ -12,6 +12,7 @@ import Data.Set as Set
 
 import Data.Function (on)
 import System.Random
+import System.Process
 
 import Scanner
 import Formula
@@ -21,6 +22,11 @@ import CNF_converter
 -- Data type for the Model
 type Model = Map String Bool
 
+genCNFPython :: Prop -> IO Prop
+genCNFPython p = do
+   -- TODO --
+   cnf <- readProcess "python3" ["cnf.py", (show p)] ""
+   return (parse cnf)
 
 -- Returns the list of symbols in a Formula
 symbols :: Prop -> [String]
@@ -48,18 +54,23 @@ ttEntails kb query = let (kbTree, qTree) = (parse kb, parse query) in ttCheckAll
               | otherwise = let (p:rest) = symbols in ((ttCheckAll kb alpha rest $ Map.insert p True model) && 
                                                       (ttCheckAll kb alpha rest $ Map.insert p False model))
 
+loopTillDone clauses new
+    | Set.member Set.empty resolvents = True
+    | otherwise =
+      let nnew = new `Set.union` resolvents in
+      if (nnew `Set.isSubsetOf` clauses) then False
+      else loopTillDone (clauses `Set.union` nnew) nnew
+      where resolvents = Set.fromList . concat $ [plResolve x y | (x:ys) <- tails (Set.toList clauses), y <- ys]
 
 -- Advanced Propositional Inference: Propositional Resolution
-plResolution :: String -> String -> Bool
-plResolution kb query = loopTillDone (Set.map (Set.fromList . literalsInClause) (Set.fromList . getCNFClauses . genCNF $ (kbTree) :&: (Not qTree))) Set.empty
-    where (kbTree, qTree) = (parse kb, parse query)
-          loopTillDone clauses new
-              | Set.member Set.empty resolvents = True
-              | otherwise =
-                let nnew = new `Set.union` resolvents in
-                if (nnew `Set.isSubsetOf` clauses) then False
-                else loopTillDone (clauses `Set.union` nnew) nnew
-                where resolvents = Set.fromList . concat $ [plResolve x y | (x:ys) <- tails (Set.toList clauses), y <- ys]
+plResolution :: String -> String -> IO Bool
+plResolution kb query = do
+    let (kbTree, qTree) = (parse kb, parse query)
+    -- TODO --
+    let cnfForm = genCNF $ (kbTree) :&: (Not qTree) 
+    let result = loopTillDone (Set.map (Set.fromList . literalsInClause) (Set.fromList . getCNFClauses $ cnfForm)) Set.empty
+    return result
+
 
 -- Returns the list of all possible clauses obtained by resolving its 2 input clauses
 -- Assumes prop to be in CNF
@@ -71,8 +82,10 @@ plResolve ci cj = List.filter (\p -> not . or $ [tautology p, longerClause p])
 
 
 walkSatEntails :: String -> String -> IO Bool
-walkSatEntails kb query = do 
-   res <- walkSat (getCNFClauses . genCNF . parse $ "(" ++ kb ++ ")" ++ "& !" ++ "(" ++ query ++ ")") 0.5 10000
+walkSatEntails kb query = do
+   -- TODO --
+   let cnfForm = genCNF . parse $ "(" ++ kb ++ ")" ++ "& !" ++ "(" ++ query ++ ")"
+   res <- walkSat (getCNFClauses cnfForm) 0.5 10000
    return (not res)
 
 -- Advanced Propositional Inference: WalkSAT algorithm for checking satisfiability

@@ -8,7 +8,6 @@ import System.IO
 import Test.HUnit
 import Text.Printf
 import Reasoning
-import System.Process
 
 inference :: Bool -> Bool -> String
 inference t f
@@ -24,8 +23,10 @@ runProblem testName kb q = do
 
    let resultModelChecking = inference (ttEntails kb q) (ttEntails kb ("!" ++ q))
    
-   let resultResolution = inference (plResolution kb q) (plResolution kb ("!" ++ q))
-   
+   isResolved1 <- plResolution kb q
+   isResolved2 <- plResolution kb ("!" ++ q)
+   let resultResolution = inference isResolved1 isResolved2
+ 
    isSAT1 <- walkSatEntails kb q
    isSAT2 <- walkSatEntails kb ("!" ++ q)
    let resultSAT = inference isSAT1 isSAT2
